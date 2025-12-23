@@ -1,49 +1,56 @@
-body {
-  background: none transparent;
-  padding: 15px 0 15px 0;
-  text-align: center;
-}
-
 .default-text,
 .tag {
   user-select: none;
+  -webkit-user-select: none; /* stylelint-disable-line property-no-vendor-prefix */
 }
 
-// CSS reset bound to our container
-#si-container,
-#si-container * {
+.sketchresponse {
+  text-align: center;
+}
+
+.feedback-container {
+    border-radius : 10px;
+    padding : 10px;
+    color: black;
+}
+
+.correct {
+    background-color : hsl(120deg 66% 47% / 28.4%);
+}
+
+.not-correct {
+    background-color : hsl(0deg 66% 47% / 28.4%);
+}
+
+.partial-correct {
+    background-color : hsl(44deg 99% 46% / 28.4%);
+}
+
+/* CSS reset bound to our container */
+.si-container,
+.si-container * {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
-
-  button {
-    font: inherit;
-  }
-
-  button:-moz-focus-inner {
-    border: none;
-  }
 }
 
-#si-container {
+.si-container {
+  margin: 20px;
   position: relative;
-  background: white;
-  box-shadow: 0 4px 10px 0 rgba(0, 0, 0, 0.2);
-  border-bottom: 1px solid hsla(0, 0, 0, 0.2);
+  background-color: #fff;
+  border: 1px solid lightgray;
   display: inline-flex;
   flex-direction: column;
-
-  // Default font
-  font-family: "Noto Sans Regular", sans-serif;
   font-size: 12px;
   line-height: 1.3;
+  outline: none;
 }
 
-#si-canvas {
-  clip-path: polygon(0% 0%, 100% 0%, 100% 100%, 0% 100%, 0% 0%);
+.si-canvas {
+  clip-path: inset(0); /* Modern alternative to polygon for full clip */
 }
 
-#si-placeholder {
+.si-placeholder {
   width: 100%;
   height: 100%;
   display: flex;
@@ -51,7 +58,7 @@ body {
   justify-content: center;
 }
 
-#si-attribution {
+.si-attribution {
   position: absolute;
   bottom: -1.3em;
   right: 0;
@@ -61,6 +68,7 @@ body {
 
   a {
     color: inherit;
+    text-decoration: none;
   }
 
   &:hover {
@@ -68,24 +76,27 @@ body {
   }
 }
 
-#si-help-legal {
+.si-help-legal {
   position: absolute;
+  top: 0;
+  left: 0;
   width: 100%;
   height: 100%;
-  top: 0;
-  background-color: hsla(0, 0%, 98%, 0.5);
+  background-color: hsl(0deg 0% 98% / 50%);
   display: flex;
   align-items: center;
   justify-content: center;
+  font-size: 13px;
 
   &[data-visible="false"] {
-    display: none;
+    display: none !important;
   }
 
   .si-dialog {
-    width: 500px;
-    background-color: white;
-    box-shadow: 0 4px 14px 2px rgba(0, 0, 0, 0.2);
+    width: 100%;
+    max-width: 600px;
+    background-color: #fff;
+    box-shadow: 0 4px 14px 2px rgb(0 0 0 / 20%);
     padding: 20px;
 
     header {
@@ -98,10 +109,11 @@ body {
     }
 
     a {
-      color: black;
+      color: #000;
+      text-decoration: underline;
     }
 
-    p.si-copyright {
+    .si-copyright {
       margin-top: 0;
       color: #888;
       font-size: 0.95em;
@@ -109,26 +121,27 @@ body {
   }
 }
 
-/******** Toolbar code begins here ********/
+/* ===== Toolbar Styles ===== */
 
-#si-toolbar {
+.si-toolbar {
   width: 100%;
   display: flex;
-  background: #eee;
-  border-top: 1px solid hsla(0, 0, 100%, 0.7);
-  border-bottom: 1px solid hsla(0, 0, 0, 0.03);
+  background-color: #eee;
+  border-top: 1px solid hsl(0deg 0% 100% / 70%);
+  border-bottom: 1px solid lightgray;
   user-select: none;
 
   hr {
     border: none;
     width: 2px;
-    height: initial;
     margin: 4px 7px;
-    background: hsla(0, 0, 0, 0.125);
-    &:last-of-type { margin-left: auto; } // Push last group to the right
+    background-color: hsl(0deg 0% 0% / 12.5%);
+
+    &:last-of-type {
+      margin-left: auto;
+    }
   }
 
-  // stylelint-disable-next-line no-descending-specificity
   button {
     opacity: 0.5;
     background: none;
@@ -138,49 +151,73 @@ body {
     display: block;
     width: 100%;
     position: relative;
+    cursor: pointer;
+    transition: background 0.2s, opacity 0.2s;
 
-    &.split-button-main { padding-bottom: 0; }
-    &.split-button-aux { padding-top: 0; }
+    &.split-button-main {
+      padding-bottom: 0;
+    }
+
+    &.split-button-aux {
+      padding-top: 0;
+    }
 
     &:hover {
       opacity: 1;
-      background: hsla(0, 0, 0, 0.05);
+      background-color: hsl(0deg 0% 0% / 5%);
     }
 
-    &:active { background: hsla(0, 0, 0, 0.1); }
+    &:active {
+      background-color: hsl(0deg 0% 0% / 10%);
+    }
   }
 
   menu {
-    top: calc(100% + 4px);
     position: absolute;
-    display: block;
+    top: calc(100% + 4px);
     z-index: 9999;
-    background: #eee;
+    display: block;
+    background-color: #eee;
     border: 1px solid gray;
 
     button:hover {
       opacity: 1;
-      background: hsla(0, 0, 0, 0.05);
+      background-color: hsl(0deg 0% 0% / 5%);
     }
   }
 
+  .si-dropdown {
+    border-color:darkgray;
+    border-bottom-left-radius: 4px;
+    border-bottom-right-radius: 4px;
+  }
+
   .item {
-    min-width: 55px;
-    max-width: 75px;
-    position: relative;
+    min-width: 45px;
+    max-width: 80px;
     display: flex;
     flex-direction: column;
+    position: relative;
     border-bottom: 4px solid transparent;
 
-    &:hover { border-bottom-color: hsla(0, 0, 0, 0.2); }
-
-    &[data-is-active="true"] {
-      background: hsla(0, 0, 0, 0.1);
-      button:not(.dropdown-button) { opacity: 1; }
+    .si-dropdown-button {
+      width: 78px;
     }
 
-    &[data-is-open="false"] {
-      menu { display: none; }
+    &:hover {
+      border-bottom-color: hsl(0deg 0% 0% / 20%);
+    }
+
+    &[data-is-active="true"] {
+      background-color: hsl(0deg 0% 0% / 10%);
+
+      button:not(.si-dropdown-button) {
+        opacity: 1;
+      }
+    }
+
+    &[data-is-open="false"] menu {
+      display: none;
     }
   }
 
@@ -192,10 +229,13 @@ body {
   }
 
   .label {
-    @extend .default-text;
-
+    user-select: none;
     padding: 0 5px;
     height: 32px;
     cursor: default;
   }
+}
+
+.si-toolbar.disable {
+  display: none;
 }

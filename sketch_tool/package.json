@@ -1,6 +1,6 @@
 {
   "name": "@nritschel/sketch-tool-pl",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "description": "A configurable JavaScript front-end drawing tool with plugin components - adapted for use in PrairieLearn",
   "private": false,
   "license": "LGPL-2.1",

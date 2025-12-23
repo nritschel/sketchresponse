@@ -6,7 +6,7 @@ module.exports = {
     application: './lib/main.js',
   },
   output: {
-    path: path.resolve(__dirname, 'build/'),
+    path: path.resolve(__dirname, 'dist/'),
     filename: '[name].min.js',
     chunkFilename: '[name].min.js',
     library: 'SketchInput',
@@ -44,17 +44,5 @@ module.exports = {
         ],
       },
     ],
-  },
-  optimization: {
-    splitChunks: {
-      chunks: 'all',
-      minSize: 1,
-      cacheGroups: {
-        vendors: {
-            test: /.*/,
-            name: 'sketchresponse',
-        }
-      },
-    },
   },
 };
