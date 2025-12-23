@@ -4,6 +4,7 @@
   "description": "A configurable JavaScript front-end drawing tool with plugin components - adapted for use in PrairieLearn",
   "private": false,
   "license": "LGPL-2.1",
+  "main": "dist/sketchresponse.min.js",
   "dependencies": {
     "buffer": "^6.0.3",
     "classnames": "^2.5.1",

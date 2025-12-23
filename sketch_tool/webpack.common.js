@@ -7,9 +7,11 @@ module.exports = {
   },
   output: {
     path: path.resolve(__dirname, 'dist/'),
-    filename: '[name].min.js',
-    chunkFilename: '[name].min.js',
-    library: 'SketchInput',
+    filename: 'sketchresponse.min.js',
+    chunkFilename: 'sketchresponse-[name].min.js',
+    library: 'sketchresponse',
+    libraryTarget: 'umd',
+    umdNamedDefine: true
   },
   resolve: {
     extensions: ['.js'],

@@ -27,7 +27,7 @@ module.exports = merge(common, {
   },
   plugins: [
     new MiniCssExtractPlugin({
-      filename: '[name].min.css',
+      filename: 'sketchresponse.min.css',
     }),
   ],
 });
