@@ -51,8 +51,8 @@ export function injectStyleSheet(innerHTML) {
 // Setting innerHTML on an SVG element does not work on Edge
 // We parse our XML using DOMParser instead:
 // https://developer.mozilla.org/en-US/docs/Web/API/DOMParser
-export function injectSVGDefs(xmlStr) {
-  const canvas = document.getElementById('si-canvas');
+export function injectSVGDefs(id, xmlStr) {
+  const canvas = document.getElementById(`${id}-si-canvas`);
   const defs = document.createElementNS('http://www.w3.org/2000/svg', 'defs');
   // eslint-disable-next-line prefer-template, no-param-reassign
   xmlStr = '<svg xmlns=\'http://www.w3.org/2000/svg\'>' + xmlStr + '</svg>';

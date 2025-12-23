@@ -1,7 +1,6 @@
 import deepExtend from 'deep-extend';
 import z from '../util/zdom';
 import BasePlugin from './base-plugin';
-import validate from '../config-validator';
 import horizontalLineSvg from './horizontal-line/horizontal-line-icon.svg';
 
 export const VERSION = '0.1';
@@ -16,12 +15,7 @@ const DEFAULT_PARAMS = {
 export default class HorizontalLine extends BasePlugin {
   constructor(params, app) {
     const hlParams = BasePlugin.generateDefaultParams(DEFAULT_PARAMS, params);
-    if (!app.debug || validate(params, 'horizontal-line')) {
-      deepExtend(hlParams, params);
-    } else {
-      // eslint-disable-next-line no-console
-      console.log('The horizontalLine config has errors, using default values instead');
-    }
+    deepExtend(hlParams, params);
     // Add params that are specific to this plugin
     hlParams.icon = {
       src: horizontalLineSvg,
@@ -74,6 +68,11 @@ export default class HorizontalLine extends BasePlugin {
   // This will be called when clicking on the SVG canvas after having
   // selected the horizontal line shape
   initDraw(event) {
+    if (this.limit > 0 && this.state.length >= this.limit) {
+      this.app.__messageBus.emit('showLimitWarning');
+      return
+    }
+
     // Add event listeners in capture phase
     document.addEventListener('pointermove', this.drawMove, true);
     document.addEventListener('pointerup', this.drawEnd, true);

@@ -2,7 +2,6 @@ import deepExtend from 'deep-extend';
 import z from '../util/zdom';
 import BasePlugin from './base-plugin';
 import fitCurve from './freeform/fitcurve';
-import validate from '../config-validator';
 import polylineClosedSvg from './polyline/polyline-closed-icon.svg';
 import polylineOpenSvg from './polyline/polyline-open-icon.svg';
 
@@ -42,12 +41,7 @@ function splineData(points) {
 export default class Polyline extends BasePlugin {
   constructor(params, app) {
     const plParams = BasePlugin.generateDefaultParams(DEFAULT_PARAMS, params);
-    if (!app.debug || validate(params, 'polyline')) {
-      deepExtend(plParams, params);
-    } else {
-      // eslint-disable-next-line no-console
-      console.log('The polyline config has errors, using default values instead');
-    }
+    deepExtend(plParams, params);
     const iconSrc = plParams.closed ? polylineClosedSvg : polylineOpenSvg;
     // Add params that are specific to this plugin
     plParams.icon = {
@@ -97,6 +91,11 @@ export default class Polyline extends BasePlugin {
   // This will be called when clicking on the SVG canvas after having
   // selected the line segment shape
   initDraw(event) {
+    if (this.limit > 0 && this.state.length > this.limit) {
+      this.app.__messageBus.emit('showLimitWarning');
+      return
+    }
+
     const currentPosition = {
       x: event.clientX - this.params.left,
       y: event.clientY - this.params.top,

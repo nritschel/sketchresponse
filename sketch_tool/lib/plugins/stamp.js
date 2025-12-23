@@ -1,7 +1,6 @@
 import deepExtend from 'deep-extend';
 import z from '../util/zdom';
 import BasePlugin from './base-plugin';
-import validate from '../config-validator';
 
 export const VERSION = '0.1';
 export const GRADEABLE_VERSION = '0.1';
@@ -18,12 +17,7 @@ const DEFAULT_PARAMS = {
 export default class Stamp extends BasePlugin {
   constructor(params, app) {
     const sParams = BasePlugin.generateDefaultParams(DEFAULT_PARAMS, params);
-    if (!app.debug || validate(params, 'stamp')) {
-      deepExtend(sParams, params);
-    } else {
-      // eslint-disable-next-line no-console
-      console.log('The stamp config has errors, using default values instead');
-    }
+    deepExtend(sParams, params);
     // Add params that are specific to this plugin
     sParams.icon = {
       src: sParams.iconSrc,
@@ -68,6 +62,11 @@ export default class Stamp extends BasePlugin {
   // This will be called when clicking on the SVG canvas after having
   // selected the point shape
   initDraw(event) {
+    if (this.limit > 0 && this.state.length >= this.limit) {
+      this.app.__messageBus.emit('showLimitWarning');
+      return
+    }
+
     // Add event listeners in capture phase
     document.addEventListener('pointermove', this.drawMove, true);
     document.addEventListener('pointerup', this.drawEnd, true);

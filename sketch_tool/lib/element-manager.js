@@ -6,13 +6,13 @@ import { getElementsByClassName } from './util/ms-polyfills';
 const MIN_DRAG_DISTANCE_SQUARED = 5 ** 2;
 
 export default class ElementManager {
-  constructor(app) {
+  constructor(app, enforceBounds) {
     this.app = app;
     this.registry = new WeakMap();
 
     this.pointerDownCache = new PointerDownCache(app.svg);
     this.selectionManager = new SelectionManager(app.svg, app.__messageBus);
-    this.dragManager = new DragManager(this.registry, this.selectionManager);
+    this.dragManager = new DragManager(this.registry, this.selectionManager, enforceBounds);
 
     // Only dealing with global (not per-pointer) dragging for now
     this.activePointerId = null;

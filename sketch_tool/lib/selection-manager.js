@@ -1,4 +1,3 @@
-import * as attrCache from './util/dom-attr-cache';
 import { injectStyleSheet } from './util/dom-style-helpers';
 
 // Note: data-* attributes are not officially supported in SVG 1.1 (without namespaces),
@@ -46,14 +45,14 @@ export default class SelectionManager {
 
   // eslint-disable-next-line class-methods-use-this
   select(element, mode) {
-    attrCache.setAttributeNS(element, null, SELECTED_ATTR, mode === 'override' ? 'override' : 'default');
+    element.setAttributeNS(null, SELECTED_ATTR, mode === 'override' ? 'override' : 'default');
   }
 
   // eslint-disable-next-line class-methods-use-this
-  deselect(element) { attrCache.removeAttributeNS(element, null, SELECTED_ATTR); }
+  deselect(element) { element.removeAttributeNS(null, SELECTED_ATTR); }
 
   // eslint-disable-next-line class-methods-use-this
-  isSelected(element) { return attrCache.getAttributeNS(element, null, SELECTED_ATTR) !== null; }
+  isSelected(element) { return element.getAttributeNS(null, SELECTED_ATTR) !== null; }
 
   toggleSelected(element, mode) {
     const condition = !this.isSelected(element); // toggle current value
@@ -69,6 +68,10 @@ export default class SelectionManager {
 
   deleteSelected() {
     let elWasDeleted = false;
+    if (this.getSelected().length == 0) {
+      this.messageBus.emit('showDeleteWarning');
+      return;
+    }
     this.getSelected().forEach((element) => {
       const elementClasses = element.getAttribute('class').split(' ');
       if (elementClasses.indexOf('point') !== -1) {

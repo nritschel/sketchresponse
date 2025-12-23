@@ -2,7 +2,6 @@
 /* eslint-disable key-spacing */
 import deepExtend from 'deep-extend';
 import z from '../util/zdom';
-import validate from '../config-validator';
 
 export const VERSION = '0.1';
 
@@ -133,13 +132,8 @@ class LinearScale {
 export default class Axes {
   constructor(params, app) {
     this.generateDefaultParams(params);
-    if (!app.debug || validate(params, 'axes')) {
-      deepExtend(this.params, params);
-    } else {
-      // eslint-disable-next-line no-console
-      console.log('The axes config has errors, using default values instead');
-    }
-
+    deepExtend(this.params, params);
+    
     this.el = document.createElementNS('http://www.w3.org/2000/svg', 'g');
     app.svg.appendChild(this.el);
 

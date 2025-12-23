@@ -1,7 +1,6 @@
 /* eslint-disable import/no-extraneous-dependencies */
-const merge = require('webpack-merge');
+const { merge } = require('webpack-merge');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
-const { CleanWebpackPlugin } = require('clean-webpack-plugin');
 const ReplaceInFileWebpackPlugin = require('replace-in-file-webpack-plugin');
 const CopyPlugin = require('copy-webpack-plugin');
 const common = require('./webpack.common');
@@ -12,18 +11,21 @@ module.exports = merge(common, {
   module: {
     rules: [
       {
-        test: /\.scss$/,
+        test: /\.(scss|sass)$/,
         use: [
           MiniCssExtractPlugin.loader,
           'css-loader',
-          'postcss-loader',
-          'sass-loader',
-        ],
+          {
+            loader: 'sass-loader',
+            options: {
+              implementation: require('sass'),
+            }
+          },
+        ]
       },
     ],
   },
   plugins: [
-    new CleanWebpackPlugin(),
     new MiniCssExtractPlugin({
       filename: '[name].min.css',
     }),

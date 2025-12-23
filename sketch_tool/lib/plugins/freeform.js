@@ -2,7 +2,6 @@ import deepExtend from 'deep-extend';
 import z from '../util/zdom';
 import BasePlugin from './base-plugin';
 import fitCurve from './freeform/fitcurve';
-import validate from '../config-validator';
 import freeformSvg from './freeform/freeform-icon.svg';
 
 export const VERSION = '0.1';
@@ -138,12 +137,7 @@ function getBoundingBox(x0, y0, x1, y1, x2, y2, x3, y3) {
 export default class Freeform extends BasePlugin {
   constructor(params, app) {
     const fParams = BasePlugin.generateDefaultParams(DEFAULT_PARAMS, params);
-    if (!app.debug || validate(params, 'freeform')) {
-      deepExtend(fParams, params);
-    } else {
-      // eslint-disable-next-line no-console
-      console.log('The freeform config has errors, using default values instead');
-    }
+    deepExtend(fParams, params);
     // Add params that are specific to this plugin
     fParams.icon = {
       src: freeformSvg,
@@ -192,6 +186,11 @@ export default class Freeform extends BasePlugin {
   // This will be called when clicking on the SVG canvas after having
   // selected the freeform shape
   initDraw(event) {
+    if (this.limit > 0 && this.state.length >= this.limit) {
+      this.app.__messageBus.emit('showLimitWarning');
+      return
+    }
+    
     document.addEventListener('pointermove', this.drawMove, true);
     document.addEventListener('pointerup', this.drawEnd, true);
     document.addEventListener('pointercancel', this.drawEnd, true);
@@ -261,10 +260,8 @@ export default class Freeform extends BasePlugin {
     if (this.pointsBeingDrawn.length >= 2) {
       const splineData = fitCurve(this.pointsBeingDrawn, FIT_TOLERANCE);
       splineData.forEach((point) => {
-        /* eslint-disable no-param-reassign */
         point.x = Math.round(ROUNDING_PRESCALER * point.x) / ROUNDING_PRESCALER;
         point.y = Math.round(ROUNDING_PRESCALER * point.y) / ROUNDING_PRESCALER;
-        /* eslint-enable no-param-reassign */
       });
       if (this.hasTag) {
         splineData[0].tag = this.tag.value;
@@ -282,7 +279,6 @@ export default class Freeform extends BasePlugin {
     z.render(this.el,
       z.each(this.state, (spline, splineIndex) =>
         // Draw visible spline under invisible spline
-        // eslint-disable-next-line prefer-template, no-useless-concat
         z('path.visible-' + splineIndex + '.freeform' + '.plugin-id-' + this.id, {
           d: cubicSplinePathData(spline),
           style: `stroke: ${this.params.color}; stroke-width: 3px; fill: none;`,
@@ -290,7 +286,6 @@ export default class Freeform extends BasePlugin {
       ),
       // Draw invisible, selectable spline
       z.each(this.state, (spline, splineIndex) =>
-        // eslint-disable-next-line prefer-template
         z('path.invisible-' + splineIndex + this.readOnlyClass(), {
           d: cubicSplinePathData(spline),
           style: `stroke: ${this.params.color}; stroke-width: 10px; fill: none; opacity: 0;`,
@@ -301,10 +296,8 @@ export default class Freeform extends BasePlugin {
               initialBehavior: 'none',
               onDrag: ({ dx, dy }) => {
                 this.state[splineIndex].forEach((pt) => {
-                   /* eslint-disable no-param-reassign */
                   pt.x += dx;
                   pt.y += dy;
-                   /* eslint-enable no-param-reassign */
                 });
                 this.render();
               },

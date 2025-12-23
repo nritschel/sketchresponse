@@ -1,5 +1,4 @@
 import deepExtend from 'deep-extend';
-import validate from '../config-validator';
 
 export const DEFAULT_PARAMS = {
   scale: 1,
@@ -11,9 +10,7 @@ export const DEFAULT_PARAMS = {
 export default class Image {
   constructor(params, app) {
     this.params = DEFAULT_PARAMS;
-    if (!app.debug || validate(params, 'image')) {
-      deepExtend(this.params, params);
-    }
+    deepExtend(this.params, params);
     const { scale, align, offset } = this.params; // Note: params.align.toLowerCase() was removed
 
     const x = (offset[0] / 100 + (

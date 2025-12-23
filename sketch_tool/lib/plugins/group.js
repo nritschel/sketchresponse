@@ -6,20 +6,15 @@ import Polyline from './polyline';
 import Spline from './spline';
 import Stamp from './stamp';
 import VerticalLine from './vertical-line';
-import validate from '../config-validator';
 
 export const VERSION = '0.1';
 
 export default class Group {
-  constructor(params, app) {
+  constructor(params, app, lowPriority = false) {
     if (app.debug) {
       if (typeof params.label !== 'string') {
         // eslint-disable-next-line no-param-reassign
         params.label = 'Group'; // Default value
-      }
-      if (!validate(params, 'group')) {
-        // eslint-disable-next-line no-console
-        console.log('The group config has errors, using default values instead');
       }
     }
     this.params = params;
@@ -28,6 +23,10 @@ export default class Group {
     const plugins = this.params.plugins.map((pluginParams) => pluginParams.name);
     plugins.forEach((name, index) => {
       this.params.plugins[index].isSubItem = true;
+      // There are 4 base canvas elements for frame and axes, so lowest priority is inserted after those
+      if (lowPriority) {
+        this.params.plugins[index].zIndex = 4 + index;
+      }
       const plugin = this.createPlugin(name, this.params.plugins[index], this.app);
       items.push(plugin.menuItem);
     });

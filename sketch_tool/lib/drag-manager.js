@@ -1,7 +1,8 @@
 import { getElementsByClassName } from './util/ms-polyfills';
 
 export default class DragManager {
-  constructor(registry, selectionManager) {
+  constructor(registry, selectionManager, enforceBounds) {
+    this.enforceBounds = enforceBounds;
     this.registry = registry;
     this.selectionManager = selectionManager;
 
@@ -65,33 +66,35 @@ export default class DragManager {
       .map((element) => this.registry.get(element).onDrag)
       .filter((onDrag) => onDrag !== undefined);
 
-    // First find out if any element is pushed out of bounds. In that case, we will
-    // freeze the movement in that direction to keep the selection's overall shape.
-    const inBoundsXHandlers = this.elementsToDrag
-      .map((element) => this.registry.get(element).inBoundsX)
-      .filter((inBoundsX) => inBoundsX !== undefined);
+    if (this.enforceBounds) {
+      // First find out if any element is pushed out of bounds. In that case, we will
+      // freeze the movement in that direction to keep the selection's overall shape.
+      const inBoundsXHandlers = this.elementsToDrag
+        .map((element) => this.registry.get(element).inBoundsX)
+        .filter((inBoundsX) => inBoundsX !== undefined);
 
-    const inBoundsYHandlers = this.elementsToDrag
-      .map((element) => this.registry.get(element).inBoundsY)
-      .filter((inBoundsY) => inBoundsY !== undefined);
+      const inBoundsYHandlers = this.elementsToDrag
+        .map((element) => this.registry.get(element).inBoundsY)
+        .filter((inBoundsY) => inBoundsY !== undefined);
 
-    let insideX = true; let insideY = true;
-    // eslint-disable-next-line no-restricted-syntax
-    for (const inBoundsX of inBoundsXHandlers) {
-      if (!inBoundsX(dx)) {
-        insideX = false;
-        break;
+      let insideX = true; let insideY = true;
+
+      for (const inBoundsX of inBoundsXHandlers) {
+        if (!inBoundsX(dx)) {
+          insideX = false;
+          break;
+        }
       }
-    }
-    // eslint-disable-next-line no-restricted-syntax
-    for (const inBoundsY of inBoundsYHandlers) {
-      if (!inBoundsY(dy)) {
-        insideY = false;
-        break;
+       
+      for (const inBoundsY of inBoundsYHandlers) {
+        if (!inBoundsY(dy)) {
+          insideY = false;
+          break;
+        }
       }
+      dx = insideX ? dx : 0;
+      dy = insideY ? dy : 0;
     }
-    dx = insideX ? dx : 0;
-    dy = insideY ? dy : 0;
 
     dragHandlers.forEach((onDrag) => onDrag({ dx, dy }));
     // TODO:
@@ -102,6 +105,35 @@ export default class DragManager {
   }
 
   dragEnd() {
+    let svg = this.elementsToDrag[0].viewportElement;
+    let bb0 = svg.getBoundingClientRect();
+    let [left0, top0, right0, bottom0] = [bb0.x, bb0.y, bb0.right, bb0.bottom];
+
+    let outsideCanvas = []
+    this.elementsToDrag.forEach(function (el) {
+      let bb = el.getBoundingClientRect();
+      let [left, top, right, bottom] = [bb.x, bb.y, bb.right, bb.bottom];
+      let bboxIntersection =
+        (left < right0 &&
+        top < bottom0 &&
+        bottom > top0 &&
+        right > left0) ? true : false;
+      if (!bboxIntersection) {
+        outsideCanvas.push(el);
+      }
+    });
+
+    if (outsideCanvas.length > 0) {
+      this.selectionManager.deselectAll();
+      const sm = this.selectionManager;
+      outsideCanvas.forEach(function(el) {
+        sm.select(el);
+        sm.deleteSelected();
+      });
+      this.elementsToDrag.filter(el => !outsideCanvas.includes(el)).forEach((el) => sm.select(el));
+    }
+   
+
     this.visibleElements = null;
     this.previousPosition = null;
     // Important: allows these elements to be garbage collected if removed

@@ -24,10 +24,11 @@ function renderLabel(id, text, hasDropdown) {
 }
 
 export default class Toolbar {
-  constructor(params, app) {
+  constructor(id, params, app) {
+    this.id = id;
     this.params = params;
     this.app = app;
-    this.el = document.getElementById('si-toolbar'); // TODO: pass container element in
+    this.el = document.getElementById(`${id}-si-toolbar`); // TODO: pass container element in
 
     this.isActive = false;
     this.focusedItemID = null;
@@ -94,9 +95,7 @@ export default class Toolbar {
       const oldActiveItem = allItems.find((item) => item.id === this.activeItemID);
       const newActiveItem = allItems.find((item) => item.id === id);
 
-      // eslint-disable-next-line no-unused-expressions
       oldActiveItem && oldActiveItem.deactivate();
-      // eslint-disable-next-line no-unused-expressions
       newActiveItem && newActiveItem.activate();
 
       this.activeItemID = id;
@@ -140,16 +139,13 @@ export default class Toolbar {
       ['separator', 'button', 'splitbutton'].indexOf(item.type) >= 0);
 
     z.render(this.el,
-      // eslint-disable-next-line object-curly-newline
       z.each(renderableItems, ({ type, id, icon, label, color, items, action }) => {
         if (type === 'separator') return z('hr');
         let selectedItem;
         let isActive;
         if (type === 'splitbutton') {
           selectedItem = items.find((item) => item.id === this.selectedDropdownItemMap[id]);
-          // eslint-disable-next-line no-param-reassign
           icon = selectedItem.icon;
-          // eslint-disable-next-line no-param-reassign
           color = selectedItem.color;
           isActive = (selectedItem.id === this.activeItemID);
         } else if (type === 'button') {
@@ -170,10 +166,10 @@ export default class Toolbar {
                 onclick: () => {
                   // Finalize any shape that isn't
                   this.app.__messageBus.emit('finalizeShapes', id);
-                  // eslint-disable-next-line no-unused-expressions
                   action ? action() : this.activateItem(id);
                 },
                 'aria-labelledby': `${id}-label ${id}-icon`,
+                type: 'button',
               },
               renderIcon(`${id}-icon`, icon.src, icon.alt),
               renderLabel(`${id}-label`, label, hasDropdown),
@@ -187,6 +183,7 @@ export default class Toolbar {
                   this.activateItem(this.selectedDropdownItemMap[id]);
                 },
                 'aria-labelledby': `${id}-label ${id}-icon`,
+                type: 'button'
               },
               renderIcon(`${id}-icon`, icon.src, icon.alt), // TODO: title
             ),
@@ -198,17 +195,19 @@ export default class Toolbar {
                   this.openDropdown(id);
                 },
                 'aria-haspopup': 'true',
+                type: 'button'
               },
               renderLabel(`${id}-label`, label, hasDropdown),
             ),
           ),
           z.if(hasDropdown,
-            z('menu.dropdown',
+            z('menu.si-dropdown',
               z.each(items, (item) =>
-                z('div.dropdown-item',
-                  z('button.dropdown-button', {
+                z('div.si-dropdown-item',
+                  z('button.si-dropdown-button', {
                       id: item.id,
                       onpointerdown: () => this.selectDropdownItem(id, item.id),
+                      type: 'button'
                     },
                     renderIcon(`${id}-icon`, item.icon.src, item.icon.alt), // TODO: title
                     renderLabel(`${id}-label`, item.label, false),
@@ -223,7 +222,7 @@ export default class Toolbar {
 
     // Update focus if needed
     if (this.isActive && document.activeElement.id !== this.focusedItemID) {
-      document.getElementById(this.focusedItemID).focus();
+      document.getElementById(`${this.id}-${this.focusedItemID}`).focus();
     }
   }
 }

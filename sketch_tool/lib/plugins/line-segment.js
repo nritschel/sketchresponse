@@ -2,7 +2,6 @@ import deepExtend from 'deep-extend';
 import z from '../util/zdom';
 import BasePlugin from './base-plugin';
 import { injectSVGDefs } from '../util/dom-style-helpers';
-import validate from '../config-validator';
 import arrowSvg from './line-segment/arrow-icon.svg';
 import lineSvg from './line-segment/line-icon.svg';
 
@@ -18,18 +17,13 @@ const DEFAULT_PARAMS = {
 export default class LineSegment extends BasePlugin {
   constructor(params, app) {
     const lsParams = BasePlugin.generateDefaultParams(DEFAULT_PARAMS, params);
-    if (!app.debug || validate(params, 'line-segment')) {
-      deepExtend(lsParams, params);
-    } else {
-      // eslint-disable-next-line no-console
-      console.log('The lineSegment config has errors, using default values instead');
-    }
+    deepExtend(lsParams, params);
     let iconSrc;
     // Add params that are specific to this plugin
     if (lsParams.arrowHead) {
       const { length, base } = lsParams.arrowHead;
       const refY = base / 2;
-      injectSVGDefs(`
+      injectSVGDefs(app.id, `
         <marker id="arrowhead-${params.id}" markerWidth="${length}" markerHeight="${base}" refX="${length}" refY="${refY}" orient="auto">
           <polygon points="0 0, ${length} ${refY}, 0 ${base}" style="fill: ${params.color}; stroke: ${params.color}; stroke-width: 1;"/>
         </marker>`,
@@ -136,6 +130,11 @@ export default class LineSegment extends BasePlugin {
   // This will be called when clicking on the SVG canvas after having
   // selected the line segment shape
   initDraw(event) {
+    if (this.limit > 0 && this.state.length > this.limit) {
+      this.app.__messageBus.emit('showLimitWarning');
+      return
+    }
+
     const x = event.clientX - this.params.left;
     const y = event.clientY - this.params.top;
     const currentPosition = { x, y };

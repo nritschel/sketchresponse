@@ -48,9 +48,11 @@ export default class HistoryManager {
     const newState = this.getUndoableState();
     const stateDiff = diff(this.currentState, newState);
 
-    this.undoStack.push(deepCopy(stateDiff));
-    this.redoStack = [];
-    this.currentState = newState;
+    if (stateDiff) {
+      this.undoStack.push(deepCopy(stateDiff));
+      this.redoStack = [];
+      this.currentState = newState;
+    }
   }
 
   undo() {
@@ -64,6 +66,7 @@ export default class HistoryManager {
 
     this.currentState = unpatch(this.currentState, stateDiff);
     this.stateManager.setPluginState(this.currentState);
+    this.messageBus.emit('historyUpdate');
   }
 
   redo() {
@@ -77,5 +80,6 @@ export default class HistoryManager {
 
     this.currentState = patch(this.currentState, stateDiff);
     this.stateManager.setPluginState(this.currentState);
+    this.messageBus.emit('historyUpdate');
   }
 }

@@ -1,15 +1,15 @@
 /* eslint-disable import/no-extraneous-dependencies */
 const path = require('path');
-const StylelintPlugin = require('stylelint-webpack-plugin');
 
 module.exports = {
   entry: {
     application: './lib/main.js',
   },
   output: {
-    path: path.resolve(__dirname, '../static/sketch_tool_dist/'),
+    path: path.resolve(__dirname, 'build/'),
     filename: '[name].min.js',
     chunkFilename: '[name].min.js',
+    library: 'SketchInput',
   },
   resolve: {
     extensions: ['.js'],
@@ -25,23 +25,12 @@ module.exports = {
             options: {
               presets: ['@babel/preset-env'],
             },
-          },
-          {
-            loader: 'expose-loader',
-            options: 'SketchInput',
-          },
-          {
-            loader: 'eslint-loader',
-            options: {
-              cache: true,
-              failOnError: true,
-            },
-          },
+          }
         ],
       },
       {
         test: /\.(ttf|eot|woff|woff2)$/,
-        loader: 'file-loader',
+        loader: 'ignore-loader',
       },
       {
         test: /\.svg$/,
@@ -59,14 +48,13 @@ module.exports = {
   optimization: {
     splitChunks: {
       chunks: 'all',
-      minSize: 0,
+      minSize: 1,
       cacheGroups: {
         vendors: {
-            test: /node_modules/,
-            name: 'vendors',
-        },
+            test: /.*/,
+            name: 'sketchresponse',
+        }
       },
     },
   },
-  plugins: [new StylelintPlugin()],
 };

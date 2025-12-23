@@ -18,10 +18,16 @@ export default class BasePlugin {
     };
 
     this.el = document.createElementNS('http://www.w3.org/2000/svg', 'g');
-    app.svg.appendChild(this.el);
+    if (this.params.zIndex) {
+      app.svg.insertBefore(this.el, app.svg.children[this.params.zIndex]);
+    }
+    else {
+      app.svg.appendChild(this.el);
+    }
 
     this.state = [];
     this.delIndices = [];
+    this.limit = this.params.limit || 0;
     this.readonly = this.params.readonly;
 
     if (!this.readonly) {
@@ -34,9 +40,6 @@ export default class BasePlugin {
     this.hasTag = this.params.tag !== undefined && this.params.tag !== null;
     if (this.hasTag) {
       this.tag = this.params.tag;
-      // A tag object that gets here has a valid value for any of its defined key
-      // as it has been checked by config-validator
-      // So we only check for the existence of a key and fill out defaults if necessary
       this.tag.value = this.tag.value ? this.tag.value : 'tag';
       this.tag.xoffset = this.tag.xoffset ? this.tag.xoffset : 0;
       this.tag.yoffset = this.tag.yoffset ? this.tag.yoffset : 0;
@@ -120,7 +123,7 @@ export default class BasePlugin {
     const keys = [
       'id', 'name', 'width', 'height', 'xrange', 'yrange', 'xscale', 'yscale', 'coordinates'];
     const allDefaultParams = deepCopy(defaultParams);
-    // eslint-disable-next-line no-restricted-syntax
+     
     for (const key of keys) {
       allDefaultParams[key] = params[key];
     }
@@ -137,7 +140,7 @@ export default class BasePlugin {
     });
   }
 
-  // eslint-disable-next-line class-methods-use-this
+   
   getTypeErrorStr(method) {
     return `You must implement the ${method} method in a class extending BasePlugin`;
   }
@@ -217,6 +220,7 @@ export default class BasePlugin {
       });
       // Set the foreignObject bounding box to match the Katex rendering
       this.adjustBoundingBox(el);
+    // eslint-disable-next-line no-unused-vars
     } catch (e) {
       katex.render('\\text{\\color{red}{Error: invalid markup}}', el, {
         errorColor: '#0000ff',
@@ -265,24 +269,20 @@ export default class BasePlugin {
     });
   }
 
-  // eslint-disable-next-line class-methods-use-this
+   
   adjustBoundingBox(el) {
     const bRect = getElementsByClassName(el, 'katex-html')[0].getBoundingClientRect();
     el.setAttributeNS(null, 'width', bRect.width.toString());
     el.setAttributeNS(null, 'height', bRect.height.toString());
   }
 
-  // eslint-disable-next-line class-methods-use-this
+   
   computeDashArray(dashStyle, strokeWidth) {
     const scale = strokeWidth ** 0.6; // seems about right perceptually
     switch (dashStyle) {
-      // eslint-disable-next-line prefer-template
-      case 'dashed': return 5 * scale + ',' + 3 * scale;
-      // eslint-disable-next-line prefer-template
+      case 'dashed': return 5 * scale + ',' + 3 * scale; 
       case 'longdashed': return 10 * scale + ',' + 3 * scale;
-      // eslint-disable-next-line prefer-template
       case 'dotted': return 2 * scale + ',' + 2 * scale;
-      // eslint-disable-next-line prefer-template
       case 'dashdotted': return 7 * scale + ',' + 3 * scale + ',' + 1.5 * scale + ',' + 3 * scale;
       // 'solid' or anything else
       default: return 'none';
